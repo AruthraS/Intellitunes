@@ -1,0 +1,218 @@
+<html>
+    <head>
+        <title>INTELLITUNES</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+        <style>
+            body{
+                overflow: hidden;
+                padding-left: 10px;
+                padding-top: 5px;
+            }
+            h4{
+                color:white;
+            }
+            .bg{
+                padding-left: 10px;
+                padding-top: 10px;
+                position: absolute;
+                top: 0;
+                right: -10px;
+                left: -10px;
+                bottom: 0;
+                background-image:url("https://w0.peakpx.com/wallpaper/411/68/HD-wallpaper-music-texture-grunge-music-background-music-concepts-background-with-notes-musical-notes.jpg");
+                background-position: center center;
+                background-size: cover;
+            }
+            .opensymbol{
+                padding-left:40px;
+                font-size:40px;
+                color:#ffffff;
+                filter: blur(0);
+                cursor: pointer;
+            }
+.side
+{
+    height:100%;
+    width:0;
+    position: fixed;
+    z-index: 1;
+    transition: 1s;
+    background-color:black;
+    top: 0;
+    left:0;
+    overflow-x: hidden;
+}
+.side .cls
+{
+    position: absolute;
+    top: 0;
+    right: 25px;
+    font-size: 60px;
+    margin-left: 50px;
+    padding-bottom: 18px;
+}
+.side a
+{
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 18px;
+    color: #808080;
+    display:block;
+    text-decoration:none;
+    transition:0.4s;
+    font-size: 30px;
+}
+.side a:hover
+{
+    color:white;
+}
+.side form
+{
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 18px;
+}
+.audio-controls {
+    padding-top: 550px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+button {
+    font-size: 1.5em;
+    padding: 10px;
+    margin-right: 10px;
+    background-color: #1E90FF;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: red;
+}
+
+.progress-bar-container {
+    
+    width: 60%;
+    height: 10px;
+    background-color: #ddd;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.progress-bar {
+    
+    height: 100%;
+    background-color: gray;
+    border-radius: 5px;
+    transition: width 0.3s ease;
+}
+        </style>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    </head>
+
+    <body>
+        <h4>Intellitunes</h4>
+        <div id="side" class="side">
+            <br>
+            <br>
+            <a href="javascript:void(0)" class="cls" onclick="clsside()">&times;</a>
+            <br>
+            <br>
+            <a href="#">Add songs</a>
+            <form id="add" action="/add" method="post" enctype="multipart/form-data">
+                <input type="file" name="file" id="file" placeholder="Add files">
+                <button type="submit"><i id="adds" class="material-icons">add</i></button>
+            </form>
+        </div>
+        <div class="bg">
+        <div class="opensymbol">
+            <p id="opensymbol" onclick="openside()">&#9776;</p>
+        </div>
+        <audio id="music" controls style="display: none;">
+            <source src="{{ url_for('static', filename='music/' + music_files[0]) }}" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+        <div class="audio-controls">
+            <button id="playpause" onclick="togglePlayPause()">Play</button>
+            <br><br>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+        </div>
+        </div>
+        </div>
+        <script>
+            function openside()
+{
+    document.getElementById("side").style.width="300px";
+}
+function clsside()
+{
+    document.getElementById("side").style.width=0;
+}
+    var musicFiles = [
+        {% for music_file in music_files %}
+            "{{ url_for('static', filename='music/' + music_file) }}",
+        {% endfor %}
+    ];
+
+    var music = document.getElementById('music');
+    var currentIndex = 0;
+    var isPlaying = false;
+
+    var progressBar = document.getElementById('progress-bar');
+    var progressBarContainer = document.querySelector('.progress-bar-container');
+
+    function togglePlayPause() {
+        if (isPlaying) {
+            music.pause();
+            document.getElementById('playpause').innerHTML = 'Play';
+        } else {
+            music.play();
+            document.getElementById('playpause').innerHTML = 'Pause';
+        }
+        isPlaying = !isPlaying;
+    }
+
+    function updateProgressBar() {
+        var progress = (music.currentTime / music.duration) * 100;
+        progressBar.style.width = progress + '%';
+    }
+
+    function resetProgressBar() {
+        progressBar.style.width = 0;
+    }
+
+    music.addEventListener('timeupdate', function() {
+        updateProgressBar();
+    });
+
+    music.addEventListener('ended', function() {
+        resetProgressBar();
+        currentIndex++;
+        if (currentIndex >= musicFiles.length) {
+            currentIndex = 0;
+        }
+        music.src = musicFiles[currentIndex];
+        music.play();
+        document.getElementById('playpause').innerHTML = 'Pause';
+        isPlaying = true;
+    });
+
+    progressBarContainer.addEventListener('click', function(e) {
+        var containerWidth = progressBarContainer.offsetWidth;
+        var clickedPosition = e.clientX - progressBarContainer.offsetLeft;
+        var duration = music.duration;
+        var newCurrentTime = (clickedPosition / containerWidth) * duration;
+        music.currentTime = newCurrentTime;
+        updateProgressBar();
+    });
+        </script>
+    </body>
+</html>
