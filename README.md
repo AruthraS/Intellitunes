@@ -1,5 +1,5 @@
 Intellitunes is a Music player that plays all songs from a folder.
-This even has options to add the downloaded songs into the folder directly through the web player.
+This even has options to add the downloaded songs into the folder directly through the player.
 
 
 
